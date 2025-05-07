@@ -24,13 +24,14 @@
 		{% block sidebar %}
 		<div class="flex flex-col h-full">
 			<!-- Chat messages area - This will grow to fill available space -->
-			<div class="flex-grow mb-4 overflow-y-auto">
+			<div id="chat-messages" class="flex-grow mb-4 overflow-y-auto space-y-2 p-2">
 				<!-- Placeholder for chat messages -->
-				<p class="text-xs text-center text-gray-400 dark:text-gray-500 py-4">osent related topics</p>
+				<p id="chat-placeholder" class="text-xs text-center text-gray-400 dark:text-gray-500 py-4">osent related
+					topics</p>
 			</div>
 
 			<!-- Suggestion chips -->
-			<div class="flex flex-wrap gap-2 mb-3">
+			<div id="suggestion-chips-container" class="flex flex-wrap gap-2 mb-3">
 				<button
 					class="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full hover:bg-gray-300 dark:hover:bg-gray-600">Social
 					media footprint analysis</button>
@@ -52,6 +53,14 @@
 					class="w-full h-28 p-4 pr-10 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
 					placeholder="start the search"></textarea>
 				<div class="absolute bottom-3 right-3 flex space-x-2">
+					<button id="send-button" aria-label="Send message"
+						class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+						</svg>
+					</button>
 					<button aria-label="Attach file"
 						class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -83,8 +92,65 @@
 		<p class="text-gray-700 dark:text-gray-300">This is the main content area.</p>
 		{% endblock content %}
 	</main>
+	{% block extra_js %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const chatInput = document.getElementById('chat-input');
+			const sendButton = document.getElementById('send-button');
+			const chatMessages = document.getElementById('chat-messages');
+			const chatPlaceholder = document.getElementById('chat-placeholder');
+			const suggestionChipsContainer = document.getElementById('suggestion-chips-container');
+
+			function addMessageToChat(message, sender) {
+				if (chatPlaceholder) {
+					chatPlaceholder.remove(); // Remove placeholder once a message is added
+				}
+				if (suggestionChipsContainer) {
+					suggestionChipsContainer.remove(); // Remove suggestion chips
+				}
+				const messageElement = document.createElement('div');
+				messageElement.classList.add('p-3', 'rounded-lg', 'max-w-xs', 'break-words');
+				if (sender === 'user') {
+					messageElement.classList.add('bg-blue-500', 'text-white', 'self-end', 'ml-auto');
+				} else {
+					messageElement.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200', 'self-start', 'mr-auto');
+				}
+				messageElement.textContent = message;
+				chatMessages.appendChild(messageElement);
+				chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+			}
+
+			function handleSendMessage() {
+				const message = chatInput.value.trim();
+				if (message) {
+					addMessageToChat(message, 'user');
+					// Echo the message
+					setTimeout(() => {
+						addMessageToChat(message, 'bot');
+					}, 500); // Simulate a small delay for the bot response
+					chatInput.value = ''; // Clear input
+					chatInput.style.height = 'auto'; // Reset height
+					chatInput.style.height = (chatInput.scrollHeight) + 'px'; // Adjust height
+				}
+			}
+
+			sendButton.addEventListener('click', handleSendMessage);
+			chatInput.addEventListener('keypress', function (e) {
+				if (e.key === 'Enter' && !e.shiftKey) {
+					e.preventDefault(); // Prevent new line on Enter
+					handleSendMessage();
+				}
+			});
+
+			// Auto-resize textarea
+			chatInput.addEventListener('input', function () {
+				this.style.height = 'auto';
+				this.style.height = (this.scrollHeight) + 'px';
+			});
+		});
+	</script>
+	{% endblock extra_js %}
 	{% django_browser_reload_script %}
-	{% block extra_js %}{% endblock extra_js %}
 </body>
 
 </html>
