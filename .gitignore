@@ -1,0 +1,45 @@
+# Existing
+vscodeLaunch.cmd
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg-info/
+*.so
+*.coverage
+.env
+env/
+venv/
+ENV/
+VENV/
+.Python
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+local_settings.py
+media/
+static_collected/
+
+# Tailwind CSS / Node.js (within the theme app)
+theme/static_src/node_modules/
+theme/static_src/dist/
+theme/static_src/.parcel-cache/
+theme/static_src/npm-debug.log*
+theme/static_src/yarn-debug.log*
+theme/static_src/yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo

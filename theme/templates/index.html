@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Graph Visualization - ObserVantage{% endblock title %}
+
+{% block content %}
+<div class="w-full h-full flex flex-col items-center justify-center p-4">
+	<h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">OSINT Graph</h1>
+	<div id="graph-container"
+		class="w-full h-[calc(100%-3rem)] border rounded-lg bg-gray-50 dark:bg-gray-800 shadow-lg">
+		{# D3.js will render the graph here #}
+	</div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		// Sample data
+		const nodesData = [
+			{ id: "Jon Snow", group: 1, x: 400, y: 300 },
+			{ id: "Robb Stark", group: 1, x: 300, y: 200 },
+			{ id: "Sansa Stark", group: 1, x: 350, y: 400 },
+			{ id: "Arya Stark", group: 1, x: 250, y: 350 },
+			{ id: "Eddard Stark", group: 2, x: 500, y: 300 },
+			{ id: "Catelyn Stark", group: 2, x: 500, y: 200 },
+		];
+
+		const linksData = [
+			{ source: "Jon Snow", target: "Robb Stark" },
+			{ source: "Jon Snow", target: "Sansa Stark" },
+			{ source: "Jon Snow", target: "Arya Stark" },
+			{ source: "Eddard Stark", target: "Robb Stark" },
+			{ source: "Eddard Stark", target: "Sansa Stark" },
+			{ source: "Eddard Stark", target: "Arya Stark" },
+			{ source: "Eddard Stark", target: "Catelyn Stark" },
+			{ source: "Catelyn Stark", target: "Robb Stark" },
+		];
+
+		const container = document.getElementById('graph-container');
+		const width = container.clientWidth;
+		const height = container.clientHeight;
+
+		const svg = d3.select("#graph-container")
+			.append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			.call(d3.zoom().on("zoom", function (event) {
+				svg.attr("transform", event.transform)
+			}))
+			.append("g");
+
+		// Create links
+		const link = svg.selectAll(".link")
+			.data(linksData)
+			.enter().append("line")
+			.attr("class", "link stroke-gray-400 dark:stroke-gray-600 stroke-2");
+
+		// Create nodes
+		const node = svg.selectAll(".node")
+			.data(nodesData)
+			.enter().append("g")
+			.attr("class", "node cursor-pointer");
+
+		node.append("circle")
+			.attr("r", d => d.group === 1 ? 20 : 15) // Different sizes for groups
+			.attr("class", d => d.group === 1 ? "fill-blue-500 dark:fill-blue-400" : "fill-green-500 dark:fill-green-400")
+			.attr("stroke", "white")
+			.attr("stroke-width", 1.5);
+
+		node.append("text")
+			.attr("dy", -25)
+			.attr("text-anchor", "middle")
+			.text(d => d.id)
+			.attr("class", "text-xs fill-gray-700 dark:fill-gray-200");
+
+		// Position nodes and links
+		node.attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+		link.attr("x1", d => nodesData.find(n => n.id === d.source).x)
+			.attr("y1", d => nodesData.find(n => n.id === d.source).y)
+			.attr("x2", d => nodesData.find(n => n.id === d.target).x)
+			.attr("y2", d => nodesData.find(n => n.id === d.target).y);
+
+		// Basic drag functionality
+		node.call(d3.drag()
+			.on("start", dragstarted)
+			.on("drag", dragged)
+			.on("end", dragended));
+
+		function dragstarted(event, d) {
+			d3.select(this).raise().classed("active", true);
+		}
+
+		function dragged(event, d) {
+			// Update node's position in the data
+			d.x = event.x;
+			d.y = event.y;
+			// Move the dragged node
+			d3.select(this).attr("transform", `translate(${d.x}, ${d.y})`);
+
+			// Update positions of connected links
+			link.filter(l => l.source === d.id || (l.source && l.source.id === d.id))
+				.attr("x1", d.x)
+				.attr("y1", d.y);
+			link.filter(l => l.target === d.id || (l.target && l.target.id === d.id))
+				.attr("x2", d.x)
+				.attr("y2", d.y);
+		}
+
+		function dragended(event, d) {
+			d3.select(this).classed("active", false);
+		}
+
+	});
+</script>
+{% endblock extra_js %}

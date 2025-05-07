@@ -5,7 +5,18 @@
 
 ---
 
-## Features
+## Current State
+
+The project is currently in the initial development phase. Key components set up include:
+- Django project structure.
+- Tailwind CSS for styling, with a dark theme implemented.
+- A basic user interface with a sidebar chat interface and a main content area.
+- A placeholder for D3.js graph visualizations in the main content area.
+- Initial setup for contributions (`CONTRIBUTING.md`) and Git version control (`.gitignore`).
+
+## Planned Features (Roadmap)
+
+The following core features are planned for ObserVantage:
 
 - **Automated Data Collection:** Gathers data from social media, websites, news platforms, and open databases.
 - **AI-powered Intelligence:** Uses natural language processing and ML models for entity extraction, relevance scoring, and data summarization.
